@@ -36,7 +36,7 @@ def merge_and_drop(df, column):
 
 #Load all the data
 train = loadData('train.csv')
-train = train.set_index('id')
+train = train.set_index('id') #Use ID as index
 weather = loadData('weather.csv')
 airports = loadData('airports.csv')
 test = loadData('test.csv')
@@ -60,5 +60,16 @@ y = train['is_delayed']
 X = train.drop('is_delayed', axis = 1)
 
 xgb_model = XGBClassifier(silent = False)
+#cross_val_scores = crossVal(xgb_model, X, y, 10)
 
-cross_val_scores = crossVal(xgb_model, X, y, 10)
+
+#predict_proba(data, ntree_limit=None, validate_features=True)
+test = test.set_index('id')
+test = merge_and_drop(test, 'origin')
+test = merge_and_drop(test, 'dest')
+test = merge_and_drop(test, 'carrier')
+test['dest_LGA'] = 0
+test['dest_LEX'] = 0
+test = test[X.columns]
+xgb_model.fit(X, y)
+y_hat = xgb_model.predict_proba(test)
